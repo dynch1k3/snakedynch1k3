@@ -2,7 +2,7 @@
 # from turtle import color
 import pygame
 import time
-from random import randint
+from random import *
 
 # Инициализация библиотеки pygame
 pygame.init()
@@ -12,7 +12,7 @@ white = (100, 255, 255)
 black = (0, 0, 0)
 red = (255, 0, 0)
 
-green = (50, 205, 50)
+green = (50, 250, 50)
 
 #
 dis_width = 800
@@ -38,26 +38,36 @@ x1_change = 0
 y1_change = 0
 
 clock = pygame.time.Clock()
-snake_speed = 30
-# Яблоко
-x_apple = randint(0, dis_width)
-y_apple = randint(0, dis_height)
+snake_speed = 10
 
-apple_size = 35
+# Яблоко
+x_apple = 0
+y_apple = 0
+apple = False
+apple_size = 30
+
+# Счетчик
+count = 0
+countStr = ''
+
+
+def randomApple(x_apple, y_apple):
+    x_apple = randint(0, dis_width)
+    y_apple = randint(0, dis_height)
+
+    return x_apple, y_apple
+
 
 font_style = pygame.font.SysFont(None, 50)
 
-def randomApple():
-    x_apple = randint(0, dis_width)
-    y_apple = randint(0,dis_height)
-def message(msg, color):
-    mesg = font_style.render(msg, True, color)
-    dis.blit(mesg, [dis_width / 2.5, dis_height / 2.5])
 
+def message(msg, color, x, y):
+    mesg = font_style.render(msg, True, color)
+    dis.blit(mesg, [x,y])
 
 while not game_over:
+
     for event in pygame.event.get():
-        randomApple()
         if event.type == pygame.QUIT:
             game_over = True
         if event.type == pygame.KEYDOWN:
@@ -74,9 +84,7 @@ while not game_over:
                 y1_change = snake_block
                 x1_change = 0
 
-    x_apple = randint(0, dis_width)
-    y_apple = randint(0, dis_height)
-    #Условия Проигрыша
+    #  Условия Проигрыша
     if ((x1 > dis_width or x1 < 0) or (y1 > dis_height or y1 < 0)):
         game_over = True
     x1 += x1_change
@@ -85,13 +93,32 @@ while not game_over:
 
     # Для добавления используем метод draw
     pygame.draw.rect(dis, black, [x1, y1, snake_block, snake_block])
+    pygame.draw.rect(dis, green, [x_apple, y_apple, apple_size, apple_size], 50)
+
     # Рисуем яблоко
-    pygame.draw.rect(dis, green, [x_apple, y_apple, apple_size, apple_size], 100)
+    if (apple == False):
+        x_apple = randint(0, dis_width)
+        y_apple = randint(0, dis_height)
+        pygame.draw.rect(dis, green, [x_apple, y_apple, apple_size, apple_size], 50)
+        apple = True
+
+    # Проверка на столкновение координат
+    if (((x_apple < x1) and (x_apple + apple_size > x1)) and ((y_apple < y1) and ((y_apple + apple_size) > y1)) or ((
+    x_apple < x1 + snake_block) and (x_apple + apple_size  > x1 + snake_block)) and ((y_apple < y1) and ((y_apple + apple_size) >
+                                                                                         y1))) or ((x_apple < x1)
+                                                                                                     and (x_apple + apple_size > x1)) and ((y_apple < y1 + snake_block) and ((y_apple + apple_size) > y1 + snake_block)) or ((x_apple < x1 + snake_block) and (x_apple + apple_size > x1 + snake_block)) and ((y_apple < y1 + snake_block) and ((y_apple + apple_size) > y1 + snake_block)):
+
+        x_apple = randint(apple_size, dis_width - apple_size)
+        y_apple = randint(apple_size, dis_height - apple_size)
+        count += 10
+        snake_speed += 1
+    countStr = str(count)
+    message(countStr, red, 10, 10)
     pygame.display.update()
 
     clock.tick(snake_speed)
 
-message("ТЫ ЛОХ!!", red)
+message("You lost", red)
 pygame.display.update()
 time.sleep(2)
 
